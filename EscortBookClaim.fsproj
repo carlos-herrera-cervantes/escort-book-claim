@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Constants\ClaimStatus.fs" />
     <Compile Include="Models\BaseEntity.fs" />
     <Compile Include="Models\Claim.fs" />
     <Compile Include="Models\PhysicalEvidence.fs" />
