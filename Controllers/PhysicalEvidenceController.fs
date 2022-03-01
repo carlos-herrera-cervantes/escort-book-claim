@@ -1,0 +1,63 @@
+﻿namespace EscortBookClaim.Controllers
+
+open Microsoft.AspNetCore.Mvc
+open Microsoft.AspNetCore.Http
+open Microsoft.Extensions.Configuration
+open System.Linq
+open EscortBookClaim.Repositories
+open EscortBookClaim.Services
+open EscortBookClaim.Models
+
+[<Route("api/v1/claims/{id}/physical-evidence")>]
+[<Produces("application/json")>]
+[<ApiController>]
+type PhysicalEvidenceController (
+    physicalEvidenceRepository: IPhysicalEvidenceRepository,
+    s3Service: IAWSS3Service,
+    configuration: IConfiguration
+) =
+    inherit ControllerBase()
+    
+    member this._physicalEvidenceRepository = physicalEvidenceRepository
+
+    member this._s3Service = s3Service
+
+    member this._configuration = configuration
+
+    [<HttpGet>]
+    member this.GetAllAsync() =
+        async {
+            let! physicalEvidence = this._physicalEvidenceRepository.GetAllAsync()
+            let endpoint = this._configuration["AWS:S3:Endpoint"]
+            let bucketName = this._configuration["AWS:S3:Name"]
+
+            let evidence = physicalEvidence.Select(fun p ->
+                p.Path <- endpoint + "/" + bucketName + p.Path
+                p
+            )
+
+            return evidence |> this.Ok :> IActionResult
+        }
+
+    [<HttpPost>]
+    member this.CreateAsync([<FromRoute>] id: string, [<FromForm>] image: IFormFile) =
+        async {
+            let! existsSpace = this._physicalEvidenceRepository.ValidateEvidenceNumber(id)
+
+            match existsSpace with
+            | true ->
+                let imageStream = image.OpenReadStream()
+                let! url = this._s3Service.PutObjectAsync(image.FileName)(id)(imageStream)
+                    
+                let newPhysicalEvidence = PhysicalEvidence(
+                    ClaimId = id,
+                    Path = id + "/" + image.FileName
+                )
+
+                let! _ = this._physicalEvidenceRepository.CreateAsync(newPhysicalEvidence)
+                newPhysicalEvidence.Path <- url
+
+                return this.Created("", newPhysicalEvidence) :> IActionResult
+            | false ->
+                return this.BadRequest() :> IActionResult
+        }
