@@ -6,23 +6,35 @@
 
   <ItemGroup>
     <Compile Include="Extensions\CosmosDBExtensions.fs" />
+    <Compile Include="Extensions\MongoDBExtensions.fs" />
     <Compile Include="Constants\ClaimStatus.fs" />
     <Compile Include="Handlers\IOperationHandler.fs" />
     <Compile Include="Handlers\OperationHandler.fs" />
     <Compile Include="Common\Emitter.fs" />
     <Compile Include="Models\BaseEntity.fs" />
     <Compile Include="Models\Claim.fs" />
+    <Compile Include="Models\CustomerProfile.fs" />
+    <Compile Include="Models\EscortProfile.fs" />
     <Compile Include="Models\PhysicalEvidence.fs" />
     <Compile Include="Models\Dictum.fs" />
+    <Compile Include="Models\Service.fs" />
     <Compile Include="Types\ClaimStatusEvent.fs" />
     <Compile Include="Services\IAWSS3Service.fs" />
     <Compile Include="Services\AWSS3Service.fs" />
+    <Compile Include="Contexts\EscortBookClaimContext.fs" />
+    <Compile Include="Contexts\EscortProfileContext.fs" />
     <Compile Include="Repositories\IClaimRepository.fs" />
     <Compile Include="Repositories\ClaimRepository.fs" />
     <Compile Include="Repositories\IPhysicalEvidenceRepository.fs" />
     <Compile Include="Repositories\PhysicalEvidence.fs" />
     <Compile Include="Repositories\IDictumRepository.fs" />
     <Compile Include="Repositories\DictumRepository.fs" />
+    <Compile Include="Repositories\ICustomerProfileRepository.fs" />
+    <Compile Include="Repositories\CustomerProfileRepository.fs" />
+    <Compile Include="Repositories\IEscortProfileRepository.fs" />
+    <Compile Include="Repositories\EscortProfileRepository.fs" />
+    <Compile Include="Repositories\IServiceRepository.fs" />
+    <Compile Include="Repositories\ServiceRepository.fs" />
     <Compile Include="Backgrounds\ClaimStatusConsumer.fs" />
     <Compile Include="Controllers\ClaimController.fs" />
     <Compile Include="Controllers\PhysicalEvidenceController.fs" />
@@ -35,7 +47,10 @@
     <PackageReference Include="AWSSDK.S3" Version="3.7.7.15" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.2" />
     <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.25.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.22" />
+    <PackageReference Include="MongoDB.Driver" Version="2.11.4" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="3.1.18" />
     <PackageReference Include="System.Reactive" Version="4.4.1" />
   </ItemGroup>
 

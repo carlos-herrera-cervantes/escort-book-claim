@@ -11,11 +11,12 @@ open EscortBookClaim.Models
 [<Route("api/v1/claims/{id}/physical-evidence")>]
 [<Produces("application/json")>]
 [<ApiController>]
-type PhysicalEvidenceController (
-    physicalEvidenceRepository: IPhysicalEvidenceRepository,
-    s3Service: IAWSS3Service,
-    configuration: IConfiguration
-) =
+type PhysicalEvidenceController
+    (
+        physicalEvidenceRepository: IPhysicalEvidenceRepository,
+        s3Service: IAWSS3Service,
+        configuration: IConfiguration
+    ) =
     inherit ControllerBase()
     
     member this._physicalEvidenceRepository = physicalEvidenceRepository
@@ -28,8 +29,15 @@ type PhysicalEvidenceController (
     member this.GetAllAsync() =
         async {
             let! physicalEvidence = this._physicalEvidenceRepository.GetAllAsync()
-            let endpoint = this._configuration["AWS:S3:Endpoint"]
-            let bucketName = this._configuration["AWS:S3:Name"]
+            let endpoint = this._configuration
+                            .GetSection("AWS")
+                            .GetSection("S3")
+                            .GetSection("Endpoint").Value
+            
+            let bucketName = this._configuration
+                                .GetSection("AWS")
+                                .GetSection("S3")
+                                .GetSection("Name").Value
 
             let evidence = physicalEvidence.Select(fun p ->
                 p.Path <- endpoint + "/" + bucketName + p.Path
@@ -49,10 +57,9 @@ type PhysicalEvidenceController (
                 let imageStream = image.OpenReadStream()
                 let! url = this._s3Service.PutObjectAsync(image.FileName)(id)(imageStream)
                     
-                let newPhysicalEvidence = PhysicalEvidence(
-                    ClaimId = id,
-                    Path = id + "/" + image.FileName
-                )
+                let newPhysicalEvidence = PhysicalEvidence()
+                newPhysicalEvidence.ClaimId <- id
+                newPhysicalEvidence.Path <- id + "/" + image.FileName
 
                 let! _ = this._physicalEvidenceRepository.CreateAsync(newPhysicalEvidence)
                 newPhysicalEvidence.Path <- url

@@ -1,6 +1,7 @@
 ﻿namespace EscortBookClaim.Repositories
 
 open System
+open System.Linq
 open Microsoft.Extensions.Configuration
 open Microsoft.Azure.Cosmos
 open EscortBookClaim.Models
@@ -13,11 +14,15 @@ type DictumRepository (client: CosmosClient, configuration: IConfiguration) =
 
     interface IDictumRepository with
 
-        member this.GetOneAsync(id: string) =
+        member this.GetOneAsync(partitionKey: string) =
             async {
-                let! response = this._container.ReadItemAsync<Dictum>(id, new PartitionKey(id))
-                             |> Async.AwaitTask
-                return response.Resource
+                let query = this._container.GetItemQueryIterator<Dictum>(
+                    "select * from c",
+                    null,
+                    QueryRequestOptions(PartitionKey = PartitionKey(partitionKey))
+                )
+                let! dictum = query.ReadNextAsync() |> Async.AwaitTask
+                return dictum.Resource.FirstOrDefault()
             }
 
         member this.CreateAsync(dictum: Dictum) =
