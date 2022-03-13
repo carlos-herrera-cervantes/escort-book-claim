@@ -1,12 +1,15 @@
 ﻿namespace EscortBookClaim.Models
 
+open MongoDB.Bson
+open MongoDB.Bson.Serialization.Attributes
 open Newtonsoft.Json
 
 type PhysicalEvidence () =
     inherit BaseEntity()
 
-    [<JsonProperty("claimId")>]
+    [<BsonElement("claimId")>]
+    [<BsonRepresentation(BsonType.ObjectId)>]
     member val ClaimId: string = null with get, set
 
-    [<JsonProperty("path")>]
+    [<BsonElement("path")>]
     member val Path: string = null with get, set

@@ -1,6 +1,6 @@
 ﻿namespace EscortBookClaim.Types
 
-type ClaimStatusEvent () =
+type ClaimStatusEvent() =
     
     member val ClaimId: string = null with get, set
 

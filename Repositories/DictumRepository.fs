@@ -1,44 +1,29 @@
 ﻿namespace EscortBookClaim.Repositories
 
 open System
-open System.Linq
+open Microsoft.AspNetCore.JsonPatch
+open System.Linq.Expressions
+open MongoDB.Driver
 open Microsoft.Extensions.Configuration
-open Microsoft.Azure.Cosmos
 open EscortBookClaim.Models
 
-type DictumRepository (client: CosmosClient, configuration: IConfiguration) =
+type DictumRepository (client: MongoClient, configuration: IConfiguration) =
     
-    member this._database = configuration.GetSection("CosmosDB").GetSection("Database").Value
+    let database = configuration.GetSection("MongoDB").GetSection("Default").Value
     
-    member this._container = client.GetContainer(this._database, "Dictums")
+    member this._context = client.GetDatabase(database).GetCollection<Dictum>("dictum")
 
     interface IDictumRepository with
 
-        member this.GetOneAsync(partitionKey: string) =
-            async {
-                let query = this._container.GetItemQueryIterator<Dictum>(
-                    "select * from c",
-                    null,
-                    QueryRequestOptions(PartitionKey = PartitionKey(partitionKey))
-                )
-                let! dictum = query.ReadNextAsync() |> Async.AwaitTask
-                return dictum.Resource.FirstOrDefault()
-            }
+        member this.GetOneAsync(expression: Expression<Func<Dictum, bool>>) =
+            this._context.Find(expression).FirstOrDefaultAsync()
 
-        member this.CreateAsync(dictum: Dictum) =
-            async {
-                let partitionKey = new PartitionKey(dictum.ClaimId)
-                let! result = this._container.CreateItemAsync<Dictum>(dictum, Nullable partitionKey)
-                            |> Async.AwaitTask
+        member this.CreateAsync(dictum: Dictum) = this._context.InsertOneAsync dictum
 
-                return result
-            }
+        member this.UpdateOneAsync(id: string)(newDictum: Dictum)(currentDictum: JsonPatchDocument<Dictum>) =
+            currentDictum.ApplyTo(newDictum)
 
-        member this.UpdateOneAsync(id: string)(dictum: Dictum) =
-            async {
-                let partitionKey = new PartitionKey(id)
-                let! result = this._container.UpsertItemAsync<Dictum>(dictum, Nullable partitionKey)
-                            |> Async.AwaitTask
+            let filter = Builders<Dictum>.Filter.Eq((fun entity -> entity.Id), id)
+            let options = ReplaceOptions(IsUpsert = true)
 
-                return result
-            }
+            this._context.ReplaceOneAsync(filter, newDictum, options)

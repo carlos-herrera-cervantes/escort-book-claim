@@ -1,51 +1,33 @@
 namespace EscortBookClaim.Repositories
 
 open System
-open System.Collections.Generic
+open System.Linq.Expressions
 open Microsoft.Extensions.Configuration
-open Microsoft.Azure.Cosmos
-open System.Linq
+open MongoDB.Driver
 open EscortBookClaim.Models
+open EscortBookClaim.Common
 
-type ClaimRepository (client: CosmosClient, configuration: IConfiguration) =
+type ClaimRepository (client: MongoClient, configuration: IConfiguration) =
 
-    member this._database = configuration.GetSection("CosmosDB").GetSection("Database").Value
-
-    member this._container = client.GetContainer(this._database, "Claims")
+    let database = configuration.GetSection("MongoDB").GetSection("Default").Value
+    
+    member this._context = client.GetDatabase(database).GetCollection<Claim>("claim")
 
     interface IClaimRepository with
 
-        member this.GetAllAsync(offset: int, limit: int) =
-            async {
-                let query = this._container.GetItemQueryIterator<Claim>()
-                let results = List<Claim>()
+        member this.GetAllAsync(offset: int)(limit: int)(filters: string) =
+            let buildedFilter = MongoDBDefinitions<Claim>.BuildFilter filters
+            let page = if offset <= 1 then 0 else offset - 1
 
-                while (query.HasMoreResults) do
-                    let! response = query.ReadNextAsync() |> Async.AwaitTask
-                    results.AddRange(response.ToList())
+            this._context.Find(buildedFilter).Skip(Nullable (page * limit)).Limit(Nullable limit).ToListAsync()
 
-                return results :> IEnumerable<Claim>
-            }
+        member this.GetOneAsync(expression: Expression<Func<Claim, bool>>) =
+            this._context.Find(expression).FirstOrDefaultAsync()
 
-        member this.GetOneAsync(id: string) =
-            async {
-                let! response = this._container.ReadItemAsync<Claim>(id, new PartitionKey(id)) |> Async.AwaitTask
-                return response.Resource
-            }
+        member this.CreateAsync(claim: Claim) = this._context.InsertOneAsync claim
 
-        member this.CreateAsync(claim: Claim) =
-            async {
-                let partitionKey = new PartitionKey(claim.Id)
-                let! result = this._container.CreateItemAsync<Claim>(claim, Nullable partitionKey) |> Async.AwaitTask
-
-                return result
-            }
-
-        member this.UpdateOneAsync(id: string)(claim: Claim) =
-            async {
-                let partitionKey = new PartitionKey(id)
-                let! result = this._container.UpsertItemAsync<Claim>(claim, Nullable partitionKey)
-                            |> Async.AwaitTask
-
-                return result
-            }
+        member this.UpdateOneAsync(id: string)(newClaim: Claim) =
+            let filter = Builders<Claim>.Filter.Eq((fun entity -> entity.Id), id)
+            let options = ReplaceOptions(IsUpsert = true)
+            
+            this._context.ReplaceOneAsync(filter, newClaim, options)

@@ -3,6 +3,7 @@ namespace EscortBookClaim.Controllers
 open Microsoft.AspNetCore.Mvc
 open EscortBookClaim.Repositories
 open EscortBookClaim.Models
+open EscortBookClaim.Types
 
 [<Route("api/v1/claims")>]
 [<Produces("application/json")>]
@@ -28,16 +29,16 @@ type ClaimController
     member this._serviceRepository = serviceRepository
 
     [<HttpGet>]
-    member this.GetAllAsync() =
+    member this.GetAllAsync([<FromBody>] payload: Payload) =
         async {
-            let! claims = this._claimRepository.GetAllAsync(0, 10)
+            let! claims = this._claimRepository.GetAllAsync(0)(10)("CustomerId=" + payload.User.Id) |> Async.AwaitTask
             return claims |> this.Ok :> IActionResult
         }
 
     [<HttpGet("{id}")>]
     member this.GetOneAsync([<FromRoute>] id: string) =
         async {
-            let! claim = this._claimRepository.GetOneAsync(id)
+            let! claim = this._claimRepository.GetOneAsync(fun c -> c.Id = id) |> Async.AwaitTask
 
             match box claim with
             | null ->
@@ -49,7 +50,7 @@ type ClaimController
                                     |> Async.AwaitTask
                 let! service = this._serviceRepository.GetByIdAsync(claim.ServiceId)
                                     |> Async.AwaitTask
-                let! dictum = this._dictumRepository.GetOneAsync(id)
+                let! dictum = this._dictumRepository.GetOneAsync(fun d -> d.ClaimId = id) |> Async.AwaitTask
 
                 let claimDetail = ClaimDetailDTO()
                 claimDetail.Id <- claim.Id
@@ -68,8 +69,20 @@ type ClaimController
         }
 
     [<HttpPost>]
-    member this.CreateAsync([<FromBody>] claim: Claim) =
+    member this.CreateAsync([<FromBody>] createClaimDTO: CreateClaimDTO) =
         async {
-            let! _ = this._claimRepository.CreateAsync(claim)
-            return this.Created("", claim) :> IActionResult
+            let newClaim = Claim()
+            newClaim.ServiceId <- createClaimDTO.ServiceId
+            newClaim.Comment <- createClaimDTO.Comment
+
+            if createClaimDTO.User.Type = "Escort" then
+                newClaim.EscortId <- createClaimDTO.User.Id
+                newClaim.CustomerId <- createClaimDTO.CustomerId
+
+            if createClaimDTO.User.Type = "Customer" then
+                newClaim.CustomerId <- createClaimDTO.User.Id
+                newClaim.EscortId <- createClaimDTO.EscortId
+
+            let! _ = this._claimRepository.CreateAsync(newClaim) |> Async.AwaitTask
+            return this.Created("", newClaim) :> IActionResult
         }

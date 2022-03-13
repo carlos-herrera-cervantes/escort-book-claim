@@ -13,11 +13,10 @@ type AWSS3Service (configuration: IConfiguration) =
     let secretKey = s3Section.GetSection("SecretKey").Value
     let credentials = BasicAWSCredentials(accessKey, secretKey)
     let s3Config = AmazonS3Config(
-        ServiceURL = s3Section.GetSection("Endpoint").Value,
-        UseHttp = true,
-        ForcePathStyle = true,
-        AuthenticationRegion = s3Section.GetSection("Region").Value
-    )
+                    ServiceURL = s3Section.GetSection("Endpoint").Value,
+                    UseHttp = true,
+                    ForcePathStyle = true,
+                    AuthenticationRegion = s3Section.GetSection("Region").Value)
 
     member this._s3Client = new AmazonS3Client(credentials, s3Config)
 
@@ -30,10 +29,9 @@ type AWSS3Service (configuration: IConfiguration) =
         member this.PutObjectAsync(key: string) (claimId: string) (imageStream: Stream) =
             async {
                 let request = PutObjectRequest(
-                    InputStream = imageStream,
-                    BucketName = this._bucketName,
-                    Key = claimId + "/" + key
-                )
+                                InputStream = imageStream,
+                                BucketName = this._bucketName,
+                                Key = claimId + "/" + key)
 
                 let! _ = this._s3Client.PutObjectAsync(request) |> Async.AwaitTask
                 return this._endpoint + "/" + this._bucketName + "/" + claimId + "/" + key

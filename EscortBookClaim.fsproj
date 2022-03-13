@@ -5,12 +5,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Constants\ClaimStatus.fs" />
+    <Compile Include="Constants\Operators.fs" />
     <Compile Include="Extensions\CosmosDBExtensions.fs" />
     <Compile Include="Extensions\MongoDBExtensions.fs" />
-    <Compile Include="Constants\ClaimStatus.fs" />
+    <Compile Include="Types\Operator.fs" />
+    <Compile Include="Extensions\StringExtensions.fs" />
+    <Compile Include="Types\ClaimStatusEvent.fs" />
+    <Compile Include="Types\Payload.fs" />
     <Compile Include="Handlers\IOperationHandler.fs" />
     <Compile Include="Handlers\OperationHandler.fs" />
     <Compile Include="Common\Emitter.fs" />
+    <Compile Include="Common\MongoDBDefinitions.fs" />
     <Compile Include="Models\BaseEntity.fs" />
     <Compile Include="Models\Claim.fs" />
     <Compile Include="Models\CustomerProfile.fs" />
@@ -18,7 +24,6 @@
     <Compile Include="Models\PhysicalEvidence.fs" />
     <Compile Include="Models\Dictum.fs" />
     <Compile Include="Models\Service.fs" />
-    <Compile Include="Types\ClaimStatusEvent.fs" />
     <Compile Include="Services\IAWSS3Service.fs" />
     <Compile Include="Services\AWSS3Service.fs" />
     <Compile Include="Contexts\EscortBookClaimContext.fs" />
@@ -26,7 +31,7 @@
     <Compile Include="Repositories\IClaimRepository.fs" />
     <Compile Include="Repositories\ClaimRepository.fs" />
     <Compile Include="Repositories\IPhysicalEvidenceRepository.fs" />
-    <Compile Include="Repositories\PhysicalEvidence.fs" />
+    <Compile Include="Repositories\PhysicalEvidenceRepository.fs" />
     <Compile Include="Repositories\IDictumRepository.fs" />
     <Compile Include="Repositories\DictumRepository.fs" />
     <Compile Include="Repositories\ICustomerProfileRepository.fs" />

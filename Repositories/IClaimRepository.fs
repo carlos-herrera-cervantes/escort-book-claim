@@ -1,12 +1,16 @@
 namespace EscortBookClaim.Repositories
 
+open System
+open System.Linq.Expressions
+open Microsoft.AspNetCore.JsonPatch
 open System.Collections.Generic
-open Microsoft.Azure.Cosmos
+open System.Threading.Tasks
+open MongoDB.Driver
 open EscortBookClaim.Models
 
 [<AllowNullLiteral>]
 type IClaimRepository =
-    abstract member GetAllAsync: int * int -> Async<IEnumerable<Claim>>
-    abstract member GetOneAsync: string -> Async<Claim>
-    abstract member CreateAsync: Claim -> Async<ItemResponse<Claim>>
-    abstract member UpdateOneAsync: string -> Claim -> Async<ItemResponse<Claim>>
+    abstract member GetAllAsync: int -> int -> string -> Task<List<Claim>>
+    abstract member GetOneAsync: Expression<Func<Claim, bool>> -> Task<Claim>
+    abstract member CreateAsync: Claim -> Task
+    abstract member UpdateOneAsync: string -> Claim -> Task<ReplaceOneResult>
