@@ -2,15 +2,21 @@
 
 open System
 open Newtonsoft.Json
+open MongoDB.Bson
+open MongoDB.Bson.Serialization.Attributes
 
 [<AllowNullLiteral>]
 type BaseEntity () =
 
-    [<JsonProperty("id")>]
-    member val Id: string = Guid.NewGuid().ToString() with get, set
+    [<BsonElement("_id")>]
+    [<BsonId>]
+    [<BsonRepresentation(BsonType.ObjectId)>]
+    member val Id: string = null with get, set
 
-    [<JsonProperty("createdAt")>]
+    [<BsonElement("createdAt")>]
+    [<BsonRepresentation(BsonType.DateTime)>]
     member val CreatedAt: DateTime = DateTime.UtcNow with get, set
 
-    [<JsonProperty("updatedAt")>]
+    [<BsonElement("updatedAt")>]
+    [<BsonRepresentation(BsonType.DateTime)>]
     member val UpdatedAt: DateTime = DateTime.UtcNow with get, set

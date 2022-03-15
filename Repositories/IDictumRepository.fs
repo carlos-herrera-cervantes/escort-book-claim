@@ -1,9 +1,13 @@
 ﻿namespace EscortBookClaim.Repositories
 
-open Microsoft.Azure.Cosmos
+open System
+open Microsoft.AspNetCore.JsonPatch
+open System.Linq.Expressions
+open System.Threading.Tasks
+open MongoDB.Driver
 open EscortBookClaim.Models
 
 type IDictumRepository =
-    abstract member GetOneAsync: string -> Async<Dictum>
-    abstract member CreateAsync: Dictum -> Async<ItemResponse<Dictum>>
-    abstract member UpdateOneAsync: string -> Dictum -> Async<ItemResponse<Dictum>>
+    abstract member GetOneAsync: Expression<Func<Dictum, bool>> -> Task<Dictum>
+    abstract member CreateAsync: Dictum -> Task
+    abstract member UpdateOneAsync: string -> Dictum -> JsonPatchDocument<Dictum> -> Task<ReplaceOneResult>

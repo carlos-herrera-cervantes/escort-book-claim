@@ -1,18 +1,22 @@
 ﻿namespace EscortBookClaim.Models
 
+open MongoDB.Bson
+open MongoDB.Bson.Serialization.Attributes
 open Newtonsoft.Json
 
 type Dictum () =
     inherit BaseEntity()
 
-    [<JsonProperty("claimId")>]
+    [<BsonElement("serviceId")>]
+    [<BsonRepresentation(BsonType.ObjectId)>]
     member val ClaimId: string = null with get, set
 
-    [<JsonProperty("response")>]
+    [<BsonElement("response")>]
     member val Response: string = null with get, set
 
-    [<JsonProperty("userId")>]
+    [<BsonElement("userId")>]
+    [<BsonRepresentation(BsonType.ObjectId)>]
     member val UserId: string = null with get, set
 
-    [<JsonProperty("status")>]
+    [<BsonElement("status")>]
     member val Status: string = null with get, set

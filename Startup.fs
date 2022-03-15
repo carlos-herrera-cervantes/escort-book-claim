@@ -6,7 +6,6 @@ open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.Configuration
 open Microsoft.EntityFrameworkCore
-open EscortBookClaim.Extensions.CosmosDBExtensions
 open EscortBookClaim.Extensions.MongoDBExtensions
 open EscortBookClaim.Repositories
 open EscortBookClaim.Services
@@ -29,7 +28,6 @@ type Startup private () =
         services.AddDbContext<EscortProfileContext>(fun options ->
             options.UseNpgsql(this.Configuration
             .GetSection("Postgres").GetSection("Default").Value) |> ignore) |> ignore
-        services.AddCosmosDBClient(this.Configuration) |> ignore
         services.AddMongoDBClient(this.Configuration) |> ignore
         services.AddTransient<IAWSS3Service, AWSS3Service>() |> ignore
         services.AddTransient<IClaimRepository, ClaimRepository>() |> ignore

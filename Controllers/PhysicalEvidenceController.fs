@@ -26,9 +26,9 @@ type PhysicalEvidenceController
     member this._configuration = configuration
 
     [<HttpGet>]
-    member this.GetAllAsync() =
+    member this.GetAllAsync([<FromRoute>] id: string) =
         async {
-            let! physicalEvidence = this._physicalEvidenceRepository.GetAllAsync()
+            let! physicalEvidence = this._physicalEvidenceRepository.GetAllAsync("ClaimId=" + id) |> Async.AwaitTask
             let endpoint = this._configuration
                             .GetSection("AWS")
                             .GetSection("S3")
@@ -39,10 +39,7 @@ type PhysicalEvidenceController
                                 .GetSection("S3")
                                 .GetSection("Name").Value
 
-            let evidence = physicalEvidence.Select(fun p ->
-                p.Path <- endpoint + "/" + bucketName + p.Path
-                p
-            )
+            let evidence = physicalEvidence.Select(fun p -> p.Path <- endpoint + "/" + bucketName + p.Path; p)
 
             return evidence |> this.Ok :> IActionResult
         }
@@ -61,7 +58,7 @@ type PhysicalEvidenceController
                 newPhysicalEvidence.ClaimId <- id
                 newPhysicalEvidence.Path <- id + "/" + image.FileName
 
-                let! _ = this._physicalEvidenceRepository.CreateAsync(newPhysicalEvidence)
+                let! _ = this._physicalEvidenceRepository.CreateAsync(newPhysicalEvidence) |> Async.AwaitTask
                 newPhysicalEvidence.Path <- url
 
                 return this.Created("", newPhysicalEvidence) :> IActionResult
