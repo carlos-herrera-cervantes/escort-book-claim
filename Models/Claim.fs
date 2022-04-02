@@ -6,6 +6,7 @@ open Newtonsoft.Json
 open EscortBookClaim.Constants
 open EscortBookClaim.Types
 
+[<AllowNullLiteral>]
 type Claim() =
     inherit BaseEntity()
     

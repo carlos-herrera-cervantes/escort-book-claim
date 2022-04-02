@@ -11,23 +11,45 @@ open EscortBookClaim.Common
 [<Route("api/v1/claims/{id}/dictum")>]
 [<Produces("application/json")>]
 [<ApiController>]
-type DictumController (dictumRepository: IDictumRepository, operationHandler: IOperationHandler<ClaimStatusEvent>) =
+type DictumController
+    (
+        dictumRepository: IDictumRepository,
+        claimStatusHandler: IOperationHandler<ClaimStatusEvent>,
+        serviceStatusHandler: IOperationHandler<ServiceStatusEvent>,
+        claimRepository: IClaimRepository
+    ) =
     inherit ControllerBase()
 
     member this._dictumRepository = dictumRepository
 
-    member this._operationHandler = operationHandler
+    member this._claimStatusHandler = claimStatusHandler
+
+    member this._serviceStatusHandler = serviceStatusHandler
+
+    member this._claimRepository = claimRepository
 
     [<HttpPost>]
-    member this.CreateAsync([<FromRoute>] id: string, [<FromBody>] dictum: Dictum) =
+    member this.CreateAsync([<FromRoute>] id: string, [<FromBody>] createDictumDTO: CreateDictumDTO) =
         async {
-            dictum.ClaimId <- id
-            let! _ = this._dictumRepository.CreateAsync(dictum) |> Async.AwaitTask
+            let! claim = this._claimRepository.GetOneAsync(fun c -> c.Id = id) |> Async.AwaitTask
 
-            let claimStatusEvent = new ClaimStatusEvent(ClaimId = id, Status = dictum.Status)
-            Emitter<ClaimStatusEvent>.EmitMessage(this._operationHandler, claimStatusEvent)
+            match claim with
+            | null -> return this.NotFound() :> IActionResult
+            | _ ->
+                let newDictum = Dictum(
+                                    ClaimId = id,
+                                    Response = createDictumDTO.Response,
+                                    UserId = createDictumDTO.User.Id,
+                                    Status = createDictumDTO.Status)
+                let! _ = this._dictumRepository.CreateAsync(newDictum) |> Async.AwaitTask
 
-            return this.Created("", dictum) :> IActionResult
+                let claimStatusEvent = ClaimStatusEvent(ClaimId = id, Status = createDictumDTO.Status)
+                let serviceStatusEvent = ServiceStatusEvent(ServiceId = claim.ServiceId, Status = createDictumDTO.Status)
+                
+                Emitter<ClaimStatusEvent>.EmitMessage(this._claimStatusHandler, claimStatusEvent)
+                Emitter<ServiceStatusEvent>.EmitMessage(this._serviceStatusHandler, serviceStatusEvent)
+
+                return this.Created("", newDictum) :> IActionResult
         }
 
     [<HttpPatch>]
@@ -35,13 +57,12 @@ type DictumController (dictumRepository: IDictumRepository, operationHandler: IO
         async {
             let! dictum = this._dictumRepository.GetOneAsync(fun d -> d.ClaimId = id) |> Async.AwaitTask
 
-            match box dictum with
-            | null ->
-                return this.NotFound() :> IActionResult
+            match dictum with
+            | null -> return this.NotFound() :> IActionResult
             | _ ->
                 let! _ = this._dictumRepository.UpdateOneAsync(id)(dictum)(partialDictum) |> Async.AwaitTask
-                let claimStatusEvent = new ClaimStatusEvent(ClaimId = id, Status = dictum.Status)
+                let claimStatusEvent = ClaimStatusEvent(ClaimId = id, Status = dictum.Status)
                 
-                Emitter<ClaimStatusEvent>.EmitMessage(this._operationHandler, claimStatusEvent)
+                Emitter<ClaimStatusEvent>.EmitMessage(this._claimStatusHandler, claimStatusEvent)
                 return dictum |> this.Ok :> IActionResult
         }
