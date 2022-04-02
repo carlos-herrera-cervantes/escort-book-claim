@@ -4,6 +4,7 @@ open MongoDB.Bson
 open MongoDB.Bson.Serialization.Attributes
 open Newtonsoft.Json
 
+[<AllowNullLiteral>]
 type Dictum () =
     inherit BaseEntity()
 
