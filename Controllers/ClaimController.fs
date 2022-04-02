@@ -4,6 +4,8 @@ open Microsoft.AspNetCore.Mvc
 open EscortBookClaim.Repositories
 open EscortBookClaim.Models
 open EscortBookClaim.Types
+open EscortBookClaim.Handlers
+open EscortBookClaim.Common
 
 [<Route("api/v1/claims")>]
 [<Produces("application/json")>]
@@ -14,7 +16,8 @@ type ClaimController
         customerProfileRepository: ICustomerProfileRepository,
         dictumRepository: IDictumRepository,
         escortProfileRepository: IEscortProfileRepository,
-        serviceRepository: IServiceRepository
+        serviceRepository: IServiceRepository,
+        operationHandler: IOperationHandler<string>
     ) =
     inherit ControllerBase()
 
@@ -27,6 +30,8 @@ type ClaimController
     member this._escortProfileRepository = escortProfileRepository
 
     member this._serviceRepository = serviceRepository
+
+    member this._operationHandler = operationHandler
 
     [<HttpGet>]
     member this.GetAllAsync([<FromBody>] payload: Payload) =
@@ -48,7 +53,7 @@ type ClaimController
                                     |> Async.AwaitTask
                 let! escortProfile = this._escortProfileRepository.GetByIdAsync(claim.EscortId)
                                     |> Async.AwaitTask
-                let! service = this._serviceRepository.GetByIdAsync(claim.ServiceId)
+                let! service = this._serviceRepository.GetOneAsync(fun s -> s.Id = claim.ServiceId)
                                     |> Async.AwaitTask
                 let! dictum = this._dictumRepository.GetOneAsync(fun d -> d.ClaimId = id) |> Async.AwaitTask
 
@@ -60,7 +65,9 @@ type ClaimController
                 claimDetail.Status <- claim.Status
                 claimDetail.CreatedAt <- claim.CreatedAt
                 claimDetail.UpdatedAt <- claim.UpdatedAt
-                claimDetail.Dictum <- dictum.Response
+                
+                if dictum <> null then claimDetail.Dictum <- dictum.Response
+
                 claimDetail.Price <- service.Price
                 claimDetail.Time <- service.TimeQuatity
                 claimDetail.TimeMeasurementUnit <- service.TimeMeasurementUnit
@@ -84,5 +91,6 @@ type ClaimController
                 newClaim.EscortId <- createClaimDTO.EscortId
 
             let! _ = this._claimRepository.CreateAsync(newClaim) |> Async.AwaitTask
+            Emitter<string>.EmitMessage(this._operationHandler, createClaimDTO.ServiceId)
             return this.Created("", newClaim) :> IActionResult
         }

@@ -41,6 +41,7 @@
     <Compile Include="Repositories\IServiceRepository.fs" />
     <Compile Include="Repositories\ServiceRepository.fs" />
     <Compile Include="Backgrounds\ClaimStatusConsumer.fs" />
+    <Compile Include="Backgrounds\ServiceStatusConsumer.fs" />
     <Compile Include="Controllers\ClaimController.fs" />
     <Compile Include="Controllers\PhysicalEvidenceController.fs" />
     <Compile Include="Controllers\DictumController.fs" />

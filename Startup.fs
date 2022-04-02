@@ -38,6 +38,7 @@ type Startup private () =
         services.AddTransient<IServiceRepository, ServiceRepository>() |> ignore
         services.AddSingleton(typedefof<IOperationHandler<_>>, typedefof<OperationHandler<_>>) |> ignore
         services.AddHostedService<ClaimStatusConsumer>() |> ignore
+        services.AddHostedService<ServiceStatusConsumer>() |> ignore
 
     member this.Configure(app: IApplicationBuilder, env: IWebHostEnvironment) =
         if env.IsDevelopment() then
