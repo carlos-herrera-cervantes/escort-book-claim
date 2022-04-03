@@ -2,6 +2,8 @@
 
 open Microsoft.Extensions.Configuration
 open MongoDB.Driver
+open System.Linq.Expressions
+open System
 open EscortBookClaim.Models
 open EscortBookClaim.Common
 
@@ -15,14 +17,14 @@ type PhysicalEvidenceRepository (client: MongoClient, configuration: IConfigurat
 
     interface IPhysicalEvidenceRepository with
 
-        member this.GetAllAsync(filters: string) =
-            let buildedFilter = MongoDBDefinitions<PhysicalEvidence>.BuildFilter filters
-            this._context.Find(buildedFilter).ToListAsync()
+        member this.GetAllAsync(expression: Expression<Func<PhysicalEvidence, bool>>) =
+            this._context.Find(expression).ToListAsync()
 
         member this.CreateAsync(physicalEvidence: PhysicalEvidence) = this._context.InsertOneAsync physicalEvidence
 
-        member this.ValidateEvidenceNumber(claimId: string) =
+        member this.ValidateEvidenceNumber(claimId: string)(userId: string) =
             async {
-                let! result = this._context.CountDocumentsAsync(fun e -> e.ClaimId = claimId) |> Async.AwaitTask
+                let! result = this._context.CountDocumentsAsync(fun e -> e.ClaimId = claimId && e.UserId = userId)
+                            |> Async.AwaitTask
                 return result < this._maxEvidenceNumber
             }

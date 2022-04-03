@@ -7,6 +7,7 @@ open System.Linq
 open EscortBookClaim.Repositories
 open EscortBookClaim.Services
 open EscortBookClaim.Models
+open EscortBookClaim.Types
 
 [<Route("api/v1/claims/{id}/physical-evidence")>]
 [<Produces("application/json")>]
@@ -26,9 +27,14 @@ type PhysicalEvidenceController
     member this._configuration = configuration
 
     [<HttpGet>]
-    member this.GetAllAsync([<FromRoute>] id: string) =
+    member this.GetAllAsync
+        (
+            [<FromRoute>] id: string,
+            [<FromHeader(Name = "user-id")>] userId: string
+        ) =
         async {
-            let! physicalEvidence = this._physicalEvidenceRepository.GetAllAsync("ClaimId=" + id) |> Async.AwaitTask
+            let! physicalEvidence = this._physicalEvidenceRepository.GetAllAsync(fun p -> p.ClaimId = id && p.UserId = userId)
+                                    |> Async.AwaitTask
             let endpoint = this._configuration
                             .GetSection("AWS")
                             .GetSection("S3")
@@ -39,15 +45,20 @@ type PhysicalEvidenceController
                                 .GetSection("S3")
                                 .GetSection("Name").Value
 
-            let evidence = physicalEvidence.Select(fun p -> p.Path <- endpoint + "/" + bucketName + p.Path; p)
+            let evidence = physicalEvidence.Select(fun p -> p.Path <- endpoint + "/" + bucketName + "/" + p.Path; p)
 
             return evidence |> this.Ok :> IActionResult
         }
 
     [<HttpPost>]
-    member this.CreateAsync([<FromRoute>] id: string, [<FromForm>] image: IFormFile) =
+    member this.CreateAsync
+        (
+            [<FromRoute>] id: string,
+            [<FromForm>] image: IFormFile,
+            [<FromHeader(Name = "user-id")>] userId: string
+        ) =
         async {
-            let! existsSpace = this._physicalEvidenceRepository.ValidateEvidenceNumber(id)
+            let! existsSpace = this._physicalEvidenceRepository.ValidateEvidenceNumber(id)(userId)
 
             match existsSpace with
             | true ->
@@ -57,6 +68,7 @@ type PhysicalEvidenceController
                 let newPhysicalEvidence = PhysicalEvidence()
                 newPhysicalEvidence.ClaimId <- id
                 newPhysicalEvidence.Path <- id + "/" + image.FileName
+                newPhysicalEvidence.UserId <- userId
 
                 let! _ = this._physicalEvidenceRepository.CreateAsync(newPhysicalEvidence) |> Async.AwaitTask
                 newPhysicalEvidence.Path <- url

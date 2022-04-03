@@ -29,27 +29,28 @@ type DictumController
     member this._claimRepository = claimRepository
 
     [<HttpPost>]
-    member this.CreateAsync([<FromRoute>] id: string, [<FromBody>] createDictumDTO: CreateDictumDTO) =
+    member this.CreateAsync
+        (
+            [<FromRoute>] id: string,
+            [<FromBody>] dictum: Dictum,
+            [<FromHeader(Name = "user-id")>] userId: string
+        ) =
         async {
             let! claim = this._claimRepository.GetOneAsync(fun c -> c.Id = id) |> Async.AwaitTask
 
             match claim with
             | null -> return this.NotFound() :> IActionResult
             | _ ->
-                let newDictum = Dictum(
-                                    ClaimId = id,
-                                    Response = createDictumDTO.Response,
-                                    UserId = createDictumDTO.User.Id,
-                                    Status = createDictumDTO.Status)
-                let! _ = this._dictumRepository.CreateAsync(newDictum) |> Async.AwaitTask
+                let! _ = this._dictumRepository.CreateAsync(dictum) |> Async.AwaitTask
+                dictum.UserId <- userId
 
-                let claimStatusEvent = ClaimStatusEvent(ClaimId = id, Status = createDictumDTO.Status)
-                let serviceStatusEvent = ServiceStatusEvent(ServiceId = claim.ServiceId, Status = createDictumDTO.Status)
+                let claimStatusEvent = ClaimStatusEvent(ClaimId = id, Status = dictum.Status)
+                let serviceStatusEvent = ServiceStatusEvent(ServiceId = claim.ServiceId, Status = dictum.Status)
                 
                 Emitter<ClaimStatusEvent>.EmitMessage(this._claimStatusHandler, claimStatusEvent)
                 Emitter<ServiceStatusEvent>.EmitMessage(this._serviceStatusHandler, serviceStatusEvent)
 
-                return this.Created("", newDictum) :> IActionResult
+                return this.Created("", dictum) :> IActionResult
         }
 
     [<HttpPatch>]

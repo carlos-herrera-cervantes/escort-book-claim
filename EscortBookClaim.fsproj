@@ -13,7 +13,6 @@
     <Compile Include="Extensions\StringExtensions.fs" />
     <Compile Include="Types\ClaimStatusEvent.fs" />
     <Compile Include="Types\ServiceStatusEvent.fs" />
-    <Compile Include="Types\Payload.fs" />
     <Compile Include="Handlers\IOperationHandler.fs" />
     <Compile Include="Handlers\OperationHandler.fs" />
     <Compile Include="Common\Emitter.fs" />

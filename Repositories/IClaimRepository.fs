@@ -10,7 +10,7 @@ open EscortBookClaim.Models
 
 [<AllowNullLiteral>]
 type IClaimRepository =
-    abstract member GetAllAsync: int -> int -> string -> Task<List<Claim>>
+    abstract member GetAllAsync: Expression<Func<Claim, bool>> * int * int -> Task<List<Claim>>
     abstract member GetOneAsync: Expression<Func<Claim, bool>> -> Task<Claim>
     abstract member CreateAsync: Claim -> Task
     abstract member UpdateOneAsync: string -> Claim -> Task<ReplaceOneResult>
