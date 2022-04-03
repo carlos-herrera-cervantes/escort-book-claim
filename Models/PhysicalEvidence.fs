@@ -13,3 +13,6 @@ type PhysicalEvidence () =
 
     [<BsonElement("path")>]
     member val Path: string = null with get, set
+
+    [<BsonElement("userId")>]
+    member val UserId: string = null with get, set

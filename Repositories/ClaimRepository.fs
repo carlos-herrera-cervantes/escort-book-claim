@@ -15,11 +15,9 @@ type ClaimRepository (client: MongoClient, configuration: IConfiguration) =
 
     interface IClaimRepository with
 
-        member this.GetAllAsync(offset: int)(limit: int)(filters: string) =
-            let buildedFilter = MongoDBDefinitions<Claim>.BuildFilter filters
+        member this.GetAllAsync(expression: Expression<Func<Claim, bool>>, offset: int, limit: int) =
             let page = if offset <= 1 then 0 else offset - 1
-
-            this._context.Find(buildedFilter).Skip(Nullable (page * limit)).Limit(Nullable limit).ToListAsync()
+            this._context.Find(expression).Skip(Nullable (page * limit)).Limit(Nullable limit).ToListAsync()
 
         member this.GetOneAsync(expression: Expression<Func<Claim, bool>>) =
             this._context.Find(expression).FirstOrDefaultAsync()

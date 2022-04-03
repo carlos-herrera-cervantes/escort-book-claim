@@ -22,14 +22,3 @@ type Dictum () =
 
     [<BsonElement("status")>]
     member val Status: string = null with get, set
-
-type CreateDictumDTO() =
-
-    [<JsonProperty("response")>]
-    member val Response: string = null with get, set
-
-    [<JsonProperty("status")>]
-    member val Status: string = null with get, set
-
-    [<JsonProperty("user")>]
-    member val User: DecodedJwt = null with get, set

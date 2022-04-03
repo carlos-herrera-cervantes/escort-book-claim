@@ -21,7 +21,7 @@ type Startup private () =
         this.Configuration <- configuration
 
     member this.ConfigureServices(services: IServiceCollection) =
-        services.AddControllers() |> ignore
+        services.AddControllers().AddNewtonsoftJson() |> ignore
         services.AddDbContext<EscortBookClaimContext>(fun options ->
             options.UseSqlServer(this.Configuration
             .GetSection("SqlServer").GetSection("Default").Value) |> ignore) |> ignore

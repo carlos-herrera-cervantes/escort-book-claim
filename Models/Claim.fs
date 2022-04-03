@@ -31,23 +31,6 @@ type Claim() =
     [<BsonElement("argument")>]
     member val Argument: string = null with get, set
 
-type CreateClaimDTO() =
-
-    [<JsonProperty("serviceId")>]
-    member val ServiceId: string = null with get, set
-
-    [<JsonProperty("customerId")>]
-    member val CustomerId: string = null with get, set
-
-    [<JsonProperty("escortId")>]
-    member val EscortId: string = null with get, set
-
-    [<JsonProperty("comment")>]
-    member val Comment: string = null with get, set
-
-    [<JsonProperty("user")>]
-    member val User: DecodedJwt = null with get, set
-
 type ClaimDetailDTO() =
     inherit BaseEntity()
 

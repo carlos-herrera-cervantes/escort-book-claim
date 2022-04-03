@@ -34,9 +34,18 @@ type ClaimController
     member this._operationHandler = operationHandler
 
     [<HttpGet>]
-    member this.GetAllAsync([<FromBody>] payload: Payload) =
+    member this.GetAllAsync
+        (
+            [<FromHeader(Name = "user-id")>] userId: string,
+            [<FromHeader(Name = "user-type")>] userType: string
+        ) =
         async {
-            let! claims = this._claimRepository.GetAllAsync(0)(10)("CustomerId=" + payload.User.Id) |> Async.AwaitTask
+            let! claims = match userType with
+                            | "Customer" -> this._claimRepository.GetAllAsync((fun c -> c.CustomerId = userId), 0, 10)
+                                            |> Async.AwaitTask
+                            | _ -> this._claimRepository.GetAllAsync((fun c -> c.EscortId = userId), 0, 10)
+                                |> Async.AwaitTask
+
             return claims |> this.Ok :> IActionResult
         }
 
@@ -76,23 +85,21 @@ type ClaimController
         }
 
     [<HttpPost>]
-    member this.CreateAsync([<FromBody>] createClaimDTO: CreateClaimDTO) =
+    member this.CreateAsync
+        (
+            [<FromBody>] claim: Claim,
+            [<FromHeader(Name = "user-id")>] userId: string,
+            [<FromHeader(Name = "user-type")>] userType: string
+        ) =
         async {
-            let newClaim = Claim()
-            newClaim.ServiceId <- createClaimDTO.ServiceId
-            newClaim.Comment <- createClaimDTO.Comment
+            if userType = "Escort" then
+                claim.EscortId <- userId
+            else
+                claim.CustomerId <- userId
 
-            if createClaimDTO.User.Type = "Escort" then
-                newClaim.EscortId <- createClaimDTO.User.Id
-                newClaim.CustomerId <- createClaimDTO.CustomerId
-
-            if createClaimDTO.User.Type = "Customer" then
-                newClaim.CustomerId <- createClaimDTO.User.Id
-                newClaim.EscortId <- createClaimDTO.EscortId
-
-            let! _ = this._claimRepository.CreateAsync(newClaim) |> Async.AwaitTask
-            let serviceStatusEvent = ServiceStatusEvent(ServiceId = createClaimDTO.ServiceId, Status = newClaim.Status)
+            let! _ = this._claimRepository.CreateAsync(claim) |> Async.AwaitTask
+            let serviceStatusEvent = ServiceStatusEvent(ServiceId = claim.ServiceId, Status = claim.Status)
             Emitter<ServiceStatusEvent>.EmitMessage(this._operationHandler, serviceStatusEvent)
 
-            return this.Created("", newClaim) :> IActionResult
+            return this.Created("", claim) :> IActionResult
         }
