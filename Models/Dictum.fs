@@ -3,12 +3,13 @@
 open MongoDB.Bson
 open MongoDB.Bson.Serialization.Attributes
 open Newtonsoft.Json
+open EscortBookClaim.Types
 
 [<AllowNullLiteral>]
 type Dictum () =
     inherit BaseEntity()
 
-    [<BsonElement("serviceId")>]
+    [<BsonElement("claimId")>]
     [<BsonRepresentation(BsonType.ObjectId)>]
     member val ClaimId: string = null with get, set
 
@@ -21,3 +22,14 @@ type Dictum () =
 
     [<BsonElement("status")>]
     member val Status: string = null with get, set
+
+type CreateDictumDTO() =
+
+    [<JsonProperty("response")>]
+    member val Response: string = null with get, set
+
+    [<JsonProperty("status")>]
+    member val Status: string = null with get, set
+
+    [<JsonProperty("user")>]
+    member val User: DecodedJwt = null with get, set

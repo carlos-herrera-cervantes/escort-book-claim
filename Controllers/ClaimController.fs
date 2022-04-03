@@ -17,7 +17,7 @@ type ClaimController
         dictumRepository: IDictumRepository,
         escortProfileRepository: IEscortProfileRepository,
         serviceRepository: IServiceRepository,
-        operationHandler: IOperationHandler<string>
+        operationHandler: IOperationHandler<ServiceStatusEvent>
     ) =
     inherit ControllerBase()
 
@@ -91,6 +91,8 @@ type ClaimController
                 newClaim.EscortId <- createClaimDTO.EscortId
 
             let! _ = this._claimRepository.CreateAsync(newClaim) |> Async.AwaitTask
-            Emitter<string>.EmitMessage(this._operationHandler, createClaimDTO.ServiceId)
+            let serviceStatusEvent = ServiceStatusEvent(ServiceId = createClaimDTO.ServiceId, Status = newClaim.Status)
+            Emitter<ServiceStatusEvent>.EmitMessage(this._operationHandler, serviceStatusEvent)
+
             return this.Created("", newClaim) :> IActionResult
         }
