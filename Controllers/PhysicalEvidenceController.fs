@@ -7,7 +7,6 @@ open System.Linq
 open EscortBookClaim.Repositories
 open EscortBookClaim.Services
 open EscortBookClaim.Models
-open EscortBookClaim.Types
 
 [<Route("api/v1/claims/{id}/physical-evidence")>]
 [<Produces("application/json")>]
