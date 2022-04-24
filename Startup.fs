@@ -23,11 +23,11 @@ type Startup private () =
     member this.ConfigureServices(services: IServiceCollection) =
         services.AddControllers().AddNewtonsoftJson() |> ignore
         services.AddDbContext<EscortBookClaimContext>(fun options ->
-            options.UseSqlServer(this.Configuration
-            .GetSection("SqlServer").GetSection("Default").Value) |> ignore) |> ignore
+            options.UseNpgsql(this.Configuration
+            .GetSection("ConnectionStrings").GetSection("Customer").Value) |> ignore) |> ignore
         services.AddDbContext<EscortProfileContext>(fun options ->
             options.UseNpgsql(this.Configuration
-            .GetSection("Postgres").GetSection("Default").Value) |> ignore) |> ignore
+            .GetSection("ConnectionStrings").GetSection("Escort").Value) |> ignore) |> ignore
         services.AddMongoDBClient(this.Configuration) |> ignore
         services.AddTransient<IAWSS3Service, AWSS3Service>() |> ignore
         services.AddTransient<IClaimRepository, ClaimRepository>() |> ignore

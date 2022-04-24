@@ -6,17 +6,14 @@
 
   <ItemGroup>
     <Compile Include="Constants\ClaimStatus.fs" />
-    <Compile Include="Constants\Operators.fs" />
     <Compile Include="Extensions\CosmosDBExtensions.fs" />
     <Compile Include="Extensions\MongoDBExtensions.fs" />
     <Compile Include="Types\Operator.fs" />
-    <Compile Include="Extensions\StringExtensions.fs" />
     <Compile Include="Types\ClaimStatusEvent.fs" />
     <Compile Include="Types\ServiceStatusEvent.fs" />
     <Compile Include="Handlers\IOperationHandler.fs" />
     <Compile Include="Handlers\OperationHandler.fs" />
     <Compile Include="Common\Emitter.fs" />
-    <Compile Include="Common\MongoDBDefinitions.fs" />
     <Compile Include="Models\BaseEntity.fs" />
     <Compile Include="Models\Claim.fs" />
     <Compile Include="Models\CustomerProfile.fs" />
@@ -47,9 +44,6 @@
     <Compile Include="Controllers\DictumController.fs" />
     <Compile Include="Startup.fs" />
     <Compile Include="Program.fs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="AWSSDK.S3" Version="3.7.7.15" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.2" />
     <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.25.0" />
@@ -59,5 +53,4 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="3.1.18" />
     <PackageReference Include="System.Reactive" Version="4.4.1" />
   </ItemGroup>
-
 </Project>

@@ -2,7 +2,6 @@ namespace EscortBookClaim.Repositories
 
 open System
 open System.Linq.Expressions
-open Microsoft.AspNetCore.JsonPatch
 open System.Collections.Generic
 open System.Threading.Tasks
 open MongoDB.Driver

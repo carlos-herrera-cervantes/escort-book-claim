@@ -1,8 +1,6 @@
 ﻿namespace EscortBookClaim.Backgrounds
 
 open System
-open System.Linq.Expressions
-open Microsoft.AspNetCore.JsonPatch
 open System.Threading.Tasks
 open System.Threading
 open Microsoft.Extensions.Hosting
@@ -10,7 +8,6 @@ open Microsoft.Extensions.DependencyInjection
 open EscortBookClaim.Handlers
 open EscortBookClaim.Types
 open EscortBookClaim.Repositories
-open EscortBookClaim.Models
 
 type ClaimStatusConsumer (factory: IServiceScopeFactory, operationHandler: IOperationHandler<ClaimStatusEvent>) =
     inherit BackgroundService()

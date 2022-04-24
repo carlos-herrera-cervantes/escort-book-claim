@@ -5,7 +5,6 @@ open MongoDB.Driver
 open System.Linq.Expressions
 open System
 open EscortBookClaim.Models
-open EscortBookClaim.Common
 
 type PhysicalEvidenceRepository (client: MongoClient, configuration: IConfiguration) =
     

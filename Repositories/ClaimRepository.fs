@@ -5,7 +5,6 @@ open System.Linq.Expressions
 open Microsoft.Extensions.Configuration
 open MongoDB.Driver
 open EscortBookClaim.Models
-open EscortBookClaim.Common
 
 type ClaimRepository (client: MongoClient, configuration: IConfiguration) =
 
