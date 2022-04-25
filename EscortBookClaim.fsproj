@@ -5,6 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="Attributes\" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="Constants\ClaimStatus.fs" />
     <Compile Include="Extensions\CosmosDBExtensions.fs" />
     <Compile Include="Extensions\MongoDBExtensions.fs" />
@@ -37,6 +40,8 @@
     <Compile Include="Repositories\EscortProfileRepository.fs" />
     <Compile Include="Repositories\IServiceRepository.fs" />
     <Compile Include="Repositories\ServiceRepository.fs" />
+    <Compile Include="Attributes\ClaimExistsAttribute.fs" />
+    <Compile Include="Attributes\ServiceExistsAttribute.fs" />
     <Compile Include="Backgrounds\ClaimStatusConsumer.fs" />
     <Compile Include="Backgrounds\ServiceStatusConsumer.fs" />
     <Compile Include="Controllers\ClaimController.fs" />
@@ -44,13 +49,13 @@
     <Compile Include="Controllers\DictumController.fs" />
     <Compile Include="Startup.fs" />
     <Compile Include="Program.fs" />
-    <PackageReference Include="AWSSDK.S3" Version="3.7.7.15" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.2" />
     <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.25.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.22" />
-    <PackageReference Include="MongoDB.Driver" Version="2.11.4" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="MongoDB.Driver" Version="2.11.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.22" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="3.1.18" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.2" />
+    <PackageReference Include="AWSSDK.S3" Version="3.7.7.15" />
     <PackageReference Include="System.Reactive" Version="4.4.1" />
   </ItemGroup>
 </Project>
