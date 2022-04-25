@@ -3,7 +3,9 @@
 open System
 open MongoDB.Bson
 open MongoDB.Bson.Serialization.Attributes
+open System.Collections.Generic
 
+[<AllowNullLiteral>]
 type Service() =
 
     [<BsonElement("_id")>]
@@ -34,6 +36,9 @@ type Service() =
 
     [<BsonElement("timeMeasurementUnit")>]
     member val TimeMeasurementUnit: string = null with get, set
+
+    [<BsonElement("details")>]
+    member val Details: List<ObjectId> = null with get, set
 
     [<BsonElement("createdAt")>]
     [<BsonRepresentation(BsonType.DateTime)>]

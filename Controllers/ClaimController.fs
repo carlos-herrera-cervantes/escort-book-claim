@@ -6,6 +6,7 @@ open EscortBookClaim.Models
 open EscortBookClaim.Types
 open EscortBookClaim.Handlers
 open EscortBookClaim.Common
+open EscortBookClaim.Attributes
 
 [<Route("api/v1/claims")>]
 [<Produces("application/json")>]
@@ -55,8 +56,7 @@ type ClaimController
             let! claim = this._claimRepository.GetOneAsync(fun c -> c.Id = id) |> Async.AwaitTask
 
             match box claim with
-            | null ->
-                return NotFoundResult() :> IActionResult
+            | null -> return NotFoundResult() :> IActionResult
             | _ ->
                 let! customerProfile = this._customerProfileRepository.GetByIdAsync(claim.CustomerId)
                                     |> Async.AwaitTask
@@ -85,6 +85,7 @@ type ClaimController
         }
 
     [<HttpPost>]
+    [<ServiceExists>]
     member this.CreateAsync
         (
             [<FromBody>] claim: Claim,
@@ -97,7 +98,7 @@ type ClaimController
             else
                 claim.CustomerId <- userId
 
-            let! _ = this._claimRepository.CreateAsync(claim) |> Async.AwaitTask
+            let! _ = this._claimRepository.CreateAsync claim |> Async.AwaitTask
             let serviceStatusEvent = ServiceStatusEvent(ServiceId = claim.ServiceId, Status = claim.Status)
             Emitter<ServiceStatusEvent>.EmitMessage(this._operationHandler, serviceStatusEvent)
 

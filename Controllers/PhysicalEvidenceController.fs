@@ -7,6 +7,7 @@ open System.Linq
 open EscortBookClaim.Repositories
 open EscortBookClaim.Services
 open EscortBookClaim.Models
+open EscortBookClaim.Attributes
 
 [<Route("api/v1/claims/{id}/physical-evidence")>]
 [<Produces("application/json")>]
@@ -50,6 +51,8 @@ type PhysicalEvidenceController
         }
 
     [<HttpPost>]
+    [<ClaimExists>]
+    [<RequestSizeLimit(2000000L)>]
     member this.CreateAsync
         (
             [<FromRoute>] id: string,
