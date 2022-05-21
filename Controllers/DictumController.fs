@@ -7,6 +7,7 @@ open EscortBookClaim.Models
 open EscortBookClaim.Handlers
 open EscortBookClaim.Types
 open EscortBookClaim.Common
+open EscortBookClaim.Attributes
 
 [<Route("api/v1/claims/{id}/dictum")>]
 [<Produces("application/json")>]
@@ -41,9 +42,10 @@ type DictumController
             match claim with
             | null -> return this.NotFound() :> IActionResult
             | _ ->
-                let! _ = this._dictumRepository.CreateAsync(dictum) |> Async.AwaitTask
                 dictum.UserId <- userId
+                dictum.ClaimId <- id
 
+                let! _ = this._dictumRepository.CreateAsync(dictum) |> Async.AwaitTask
                 let claimStatusEvent = ClaimStatusEvent(ClaimId = id, Status = dictum.Status)
                 let serviceStatusEvent = ServiceStatusEvent(ServiceId = claim.ServiceId, Status = dictum.Status)
                 
@@ -54,6 +56,7 @@ type DictumController
         }
 
     [<HttpPatch>]
+    [<ClaimStatus>]
     member this.UpdateOneAsync([<FromRoute>] id: string, [<FromBody>] partialDictum: JsonPatchDocument<Dictum>) =
         async {
             let! dictum = this._dictumRepository.GetOneAsync(fun d -> d.ClaimId = id) |> Async.AwaitTask

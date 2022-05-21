@@ -7,6 +7,7 @@ open EscortBookClaim.Types
 open EscortBookClaim.Handlers
 open EscortBookClaim.Common
 open EscortBookClaim.Attributes
+open EscortBookClaim.Constants
 
 [<Route("api/v1/claims")>]
 [<Produces("application/json")>]
@@ -35,17 +36,27 @@ type ClaimController
     member this._operationHandler = operationHandler
 
     [<HttpGet>]
+    member this.GetByExternal([<FromQuery>] pager: Pager) =
+        async {
+            let! claims = this._claimRepository.GetAllAsync(pager.Page, pager.PageSize)
+                        |> Async.AwaitTask
+            return claims |> this.Ok :> IActionResult
+        }
+
+    [<HttpGet("profile")>]
     member this.GetAllAsync
         (
             [<FromHeader(Name = "user-id")>] userId: string,
-            [<FromHeader(Name = "user-type")>] userType: string
+            [<FromHeader(Name = "user-type")>] userType: string,
+            [<FromQuery>] pager: Pager
         ) =
         async {
-            let! claims = match userType with
-                            | "Customer" -> this._claimRepository.GetAllAsync((fun c -> c.CustomerId = userId), 0, 10)
-                                            |> Async.AwaitTask
-                            | _ -> this._claimRepository.GetAllAsync((fun c -> c.EscortId = userId), 0, 10)
+            let! claims =
+                match userType with
+                | "Customer" -> this._claimRepository.GetAllByFilterAsync((fun c -> c.CustomerId = userId), pager.Page, pager.PageSize)
                                 |> Async.AwaitTask
+                | _ -> this._claimRepository.GetAllByFilterAsync((fun c -> c.EscortId = userId), pager.Page, pager.PageSize)
+                    |> Async.AwaitTask
 
             return claims |> this.Ok :> IActionResult
         }
@@ -84,7 +95,7 @@ type ClaimController
                 return claimDetail |> this.Ok :> IActionResult
         }
 
-    [<HttpPost>]
+    [<HttpPost("profile")>]
     [<ServiceExists>]
     member this.CreateAsync
         (
@@ -98,9 +109,58 @@ type ClaimController
             else
                 claim.CustomerId <- userId
 
+            claim.Owner <- userType
+
             let! _ = this._claimRepository.CreateAsync claim |> Async.AwaitTask
             let serviceStatusEvent = ServiceStatusEvent(ServiceId = claim.ServiceId, Status = claim.Status)
             Emitter<ServiceStatusEvent>.EmitMessage(this._operationHandler, serviceStatusEvent)
 
             return this.Created("", claim) :> IActionResult
+        }
+
+    [<HttpPatch("{id}/argument")>]
+    member this.ArgueAsync
+        (
+            [<FromHeader(Name = "user-id")>] userId: string,
+            [<FromHeader(Name = "user-type")>] userType: string,
+            [<FromRoute>] id: string,
+            [<FromBody>] argument: ClaimArgumentDTO
+        ) =
+        async {
+            let! claim =
+                match userType with
+                | "Escort" -> this._claimRepository.GetOneAsync(fun c -> c.Id = id && c.EscortId = userId) |> Async.AwaitTask
+                | _ -> this._claimRepository.GetOneAsync(fun c -> c.Id = id && c.CustomerId = userId) |> Async.AwaitTask
+
+            match claim with
+            | null -> return NotFoundResult() :> IActionResult
+            | _ ->
+                claim.Argument <- argument.Argument
+                let! _ = this._claimRepository.UpdateOneAsync(id)(claim) |> Async.AwaitTask
+                return claim |> this.Ok :> IActionResult
+        }
+
+    [<HttpPost("{id}/cancel")>]
+    member this.CancelAsync
+        (
+            [<FromHeader(Name = "user-id")>] userId: string,
+            [<FromHeader(Name = "user-type")>] userType: string,
+            [<FromRoute>] id: string
+        ) =
+        async {
+            let! claim =
+                match userType with
+                | "Escort" -> this._claimRepository.GetOneAsync(fun c -> c.Id = id && c.EscortId = userId && c.Owner = userType)
+                            |> Async.AwaitTask
+                | _ -> this._claimRepository.GetOneAsync(fun c -> c.Id = id && c.CustomerId = userId && c.Owner = userType)
+                    |> Async.AwaitTask
+
+            match claim with
+            | null -> return NotFoundResult() :> IActionResult
+            | _ ->
+                claim.Status <- ClaimStatus.Cancelled
+                let! _ = this._claimRepository.UpdateOneAsync(id)(claim) |> Async.AwaitTask
+                let serviceStatusEvent = ServiceStatusEvent(ServiceId = claim.ServiceId, Status = ClaimStatus.Cancelled)
+                Emitter<ServiceStatusEvent>.EmitMessage(this._operationHandler, serviceStatusEvent)
+                return claim |> this.Ok :> IActionResult
         }

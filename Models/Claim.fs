@@ -4,7 +4,6 @@ open MongoDB.Bson
 open MongoDB.Bson.Serialization.Attributes
 open Newtonsoft.Json
 open EscortBookClaim.Constants
-open EscortBookClaim.Types
 
 [<AllowNullLiteral>]
 type Claim() =
@@ -30,6 +29,9 @@ type Claim() =
 
     [<BsonElement("argument")>]
     member val Argument: string = null with get, set
+
+    [<BsonElement("owner")>]
+    member val Owner: string = null with get, set
 
 type ClaimDetailDTO() =
     inherit BaseEntity()
@@ -59,4 +61,9 @@ type ClaimDetailDTO() =
     member val TimeMeasurementUnit: string = null with get, set
 
     [<BsonElement("argument")>]
+    member val Argument: string = null with get, set
+
+type ClaimArgumentDTO() =
+
+    [<JsonProperty("argument")>]
     member val Argument: string = null with get, set
