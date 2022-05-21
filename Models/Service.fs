@@ -40,6 +40,9 @@ type Service() =
     [<BsonElement("details")>]
     member val Details: List<ObjectId> = null with get, set
 
+    [<BsonElement("paymentDetails")>]
+    member val PaymentDetails: List<ObjectId> = null with get, set
+
     [<BsonElement("createdAt")>]
     [<BsonRepresentation(BsonType.DateTime)>]
     member val CreatedAt: DateTime = DateTime.UtcNow with get, set
