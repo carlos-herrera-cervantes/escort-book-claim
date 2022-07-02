@@ -19,7 +19,8 @@ type ClaimController
         dictumRepository: IDictumRepository,
         escortProfileRepository: IEscortProfileRepository,
         serviceRepository: IServiceRepository,
-        operationHandler: IOperationHandler<ServiceStatusEvent>
+        serviceStatusEmitter: IOperationHandler<ServiceStatusEvent>,
+        claimCreatedEmitter: IOperationHandler<ClaimCreatedEvent>
     ) =
     inherit ControllerBase()
 
@@ -33,7 +34,9 @@ type ClaimController
 
     member this._serviceRepository = serviceRepository
 
-    member this._operationHandler = operationHandler
+    member this._serviceStatusEmitter = serviceStatusEmitter
+
+    member this._claimCreatedEmitter = claimCreatedEmitter
 
     [<HttpGet>]
     member this.GetByExternal([<FromQuery>] pager: Pager) =
@@ -112,8 +115,16 @@ type ClaimController
             claim.Owner <- userType
 
             let! _ = this._claimRepository.CreateAsync claim |> Async.AwaitTask
+
             let serviceStatusEvent = ServiceStatusEvent(ServiceId = claim.ServiceId, Status = claim.Status)
-            Emitter<ServiceStatusEvent>.EmitMessage(this._operationHandler, serviceStatusEvent)
+            Emitter<ServiceStatusEvent>.EmitMessage(this._serviceStatusEmitter, serviceStatusEvent)
+
+            let claimCreatedEvent = ClaimCreatedEvent()
+            claimCreatedEvent.Operation <- OperationStatistics.Claim
+            claimCreatedEvent.CustomerId <- claim.CustomerId
+            claimCreatedEvent.EscortId <- claim.EscortId
+            claimCreatedEvent.To <- if userType = "Customer" then "Escort" else "Customer"
+            Emitter<ClaimCreatedEvent>.EmitMessage(this._claimCreatedEmitter, claimCreatedEvent)
 
             return this.Created("", claim) :> IActionResult
         }
@@ -161,6 +172,6 @@ type ClaimController
                 claim.Status <- ClaimStatus.Cancelled
                 let! _ = this._claimRepository.UpdateOneAsync(id)(claim) |> Async.AwaitTask
                 let serviceStatusEvent = ServiceStatusEvent(ServiceId = claim.ServiceId, Status = ClaimStatus.Cancelled)
-                Emitter<ServiceStatusEvent>.EmitMessage(this._operationHandler, serviceStatusEvent)
+                Emitter<ServiceStatusEvent>.EmitMessage(this._serviceStatusEmitter, serviceStatusEvent)
                 return claim |> this.Ok :> IActionResult
         }

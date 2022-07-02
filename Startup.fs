@@ -36,9 +36,11 @@ type Startup private () =
         services.AddTransient<ICustomerProfileRepository, CustomerProfileRepository>() |> ignore
         services.AddTransient<IEscortProfileRepository, EscortProfileRepository>() |> ignore
         services.AddTransient<IServiceRepository, ServiceRepository>() |> ignore
+        services.AddTransient<IKafkaService, KafkaService>() |> ignore
         services.AddSingleton(typedefof<IOperationHandler<_>>, typedefof<OperationHandler<_>>) |> ignore
         services.AddHostedService<ClaimStatusConsumer>() |> ignore
         services.AddHostedService<ServiceStatusConsumer>() |> ignore
+        services.AddHostedService<ClaimCreatedConsumer>() |> ignore
 
     member this.Configure(app: IApplicationBuilder, env: IWebHostEnvironment) =
         if env.IsDevelopment() then
