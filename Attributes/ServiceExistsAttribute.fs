@@ -16,7 +16,7 @@ type ServiceExistsFilter(serviceRepository: IServiceRepository) =
 
         member this.OnActionExecutionAsync(context: ActionExecutingContext, next: ActionExecutionDelegate) =
             async {
-                let claim = context.ActionArguments["claim"] :?> Claim
+                let claim = context.ActionArguments.["claim"] :?> Claim
                 let! service = this._serviceRepository.GetOneAsync(fun s -> s.Id = claim.ServiceId) |> Async.AwaitTask
 
                 if (isNull service) then

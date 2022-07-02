@@ -28,6 +28,9 @@ type Service() =
     [<BsonElement("price")>]
     member val Price: decimal = 0M with get, set
 
+    [<BsonElement("businessCommission")>]
+    member val BusinessComission: decimal = 0m with get, set
+
     [<BsonElement("status")>]
     member val Status: string = null with get, set
 
