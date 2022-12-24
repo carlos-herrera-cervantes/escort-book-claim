@@ -1,0 +1,7 @@
+README.md
+.env
+appsettings.*
+.editorconfig
+.gitignore
+.vs
+.vscode

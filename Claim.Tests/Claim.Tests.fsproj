@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+
+    <IsPackable>false</IsPackable>
+    <GenerateProgramFile>false</GenerateProgramFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
+    <PackageReference Include="Moq" Version="4.18.3" />
+    <PackageReference Include="xunit" Version="2.4.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
+    <PackageReference Include="coverlet.collector" Version="1.2.0" />
+    <PackageReference Include="Confluent.Kafka" Version="1.9.3" />
+    <PackageReference Include="MongoDB.Driver" Version="2.11.4" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="3.1.18" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Claim.Web\EscortBookClaim.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Services\" />
+    <Folder Include="Repositories\" />
+    <Folder Include="Controllers\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Services\AWSS3ServiceTests.fs" />
+    <Compile Include="Services\KafkaServiceTests.fs" />
+    <Compile Include="Repositories\ClaimRepositoryTests.fs" />
+    <Compile Include="Repositories\PhysicalEvidenceRepositoryTests.fs" />
+    <Compile Include="Repositories\DictumRepositoryTests.fs" />
+    <Compile Include="Repositories\CustomerProfileRepositoryTests.fs" />
+    <Compile Include="Repositories\EscortProfileRepositoryTests.fs" />
+    <Compile Include="Repositories\ServiceRepositoryTests.fs" />
+    <Compile Include="Controllers\ClaimControllerTests.fs" />
+    <Compile Include="Controllers\PhysicalEvidenceControllerTests.fs" />
+    <Compile Include="Controllers\DictumControllerTests.fs" />
+  </ItemGroup>
+</Project>
