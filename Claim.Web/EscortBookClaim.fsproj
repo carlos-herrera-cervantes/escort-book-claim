@@ -1,0 +1,76 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Attributes\" />
+    <Folder Include="Config\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Config\Aws.fs" />
+    <Compile Include="Config\Kafka.fs" />
+    <Compile Include="Config\Postgres.fs" />
+    <Compile Include="Config\Mongo.fs" />
+    <Compile Include="Constants\ClaimStatus.fs" />
+    <Compile Include="Constants\OperationStatistics.fs" />
+    <Compile Include="Extensions\CosmosDBExtensions.fs" />
+    <Compile Include="Extensions\MongoDBExtensions.fs" />
+    <Compile Include="Extensions\AwsExtensions.fs" />
+    <Compile Include="Types\ClaimStatusEvent.fs" />
+    <Compile Include="Types\ServiceStatusEvent.fs" />
+    <Compile Include="Types\Pager.fs" />
+    <Compile Include="Types\ClaimCreatedEvent.fs" />
+    <Compile Include="Handlers\IOperationHandler.fs" />
+    <Compile Include="Handlers\OperationHandler.fs" />
+    <Compile Include="Common\Emitter.fs" />
+    <Compile Include="Models\BaseEntity.fs" />
+    <Compile Include="Models\Claim.fs" />
+    <Compile Include="Models\CustomerProfile.fs" />
+    <Compile Include="Models\EscortProfile.fs" />
+    <Compile Include="Models\PhysicalEvidence.fs" />
+    <Compile Include="Models\Dictum.fs" />
+    <Compile Include="Models\Service.fs" />
+    <Compile Include="Services\IAWSS3Service.fs" />
+    <Compile Include="Services\AWSS3Service.fs" />
+    <Compile Include="Services\IKafkaService.fs" />
+    <Compile Include="Services\KafkaService.fs" />
+    <Compile Include="Extensions\KafkaExtensions.fs" />
+    <Compile Include="Contexts\EscortBookClaimContext.fs" />
+    <Compile Include="Contexts\EscortProfileContext.fs" />
+    <Compile Include="Repositories\IClaimRepository.fs" />
+    <Compile Include="Repositories\ClaimRepository.fs" />
+    <Compile Include="Repositories\IPhysicalEvidenceRepository.fs" />
+    <Compile Include="Repositories\PhysicalEvidenceRepository.fs" />
+    <Compile Include="Repositories\IDictumRepository.fs" />
+    <Compile Include="Repositories\DictumRepository.fs" />
+    <Compile Include="Repositories\ICustomerProfileRepository.fs" />
+    <Compile Include="Repositories\CustomerProfileRepository.fs" />
+    <Compile Include="Repositories\IEscortProfileRepository.fs" />
+    <Compile Include="Repositories\EscortProfileRepository.fs" />
+    <Compile Include="Repositories\IServiceRepository.fs" />
+    <Compile Include="Repositories\ServiceRepository.fs" />
+    <Compile Include="Attributes\ClaimExistsAttribute.fs" />
+    <Compile Include="Attributes\ServiceExistsAttribute.fs" />
+    <Compile Include="Attributes\ClaimStatusAttribute.fs" />
+    <Compile Include="Backgrounds\ClaimStatusConsumer.fs" />
+    <Compile Include="Backgrounds\ServiceStatusConsumer.fs" />
+    <Compile Include="Backgrounds\ClaimCreatedConsumer.fs" />
+    <Compile Include="Controllers\ClaimController.fs" />
+    <Compile Include="Controllers\PhysicalEvidenceController.fs" />
+    <Compile Include="Controllers\DictumController.fs" />
+    <Compile Include="Startup.fs" />
+    <Compile Include="Program.fs" />
+    <PackageReference Include="MongoDB.Driver" Version="2.11.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.2" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="3.1.18" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.22" />
+    <PackageReference Include="AWSSDK.S3" Version="3.7.7.15" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.25.0" />
+    <PackageReference Include="System.Reactive" Version="4.4.1" />
+    <PackageReference Include="Confluent.Kafka" Version="1.9.3" />
+    <PackageReference Include="Confluent.Kafka.DependencyInjection" Version="2.1.0" />
+  </ItemGroup>
+</Project>
