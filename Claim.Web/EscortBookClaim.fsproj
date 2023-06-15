@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -60,7 +60,6 @@
     <Compile Include="Controllers\ClaimController.fs" />
     <Compile Include="Controllers\PhysicalEvidenceController.fs" />
     <Compile Include="Controllers\DictumController.fs" />
-    <Compile Include="Startup.fs" />
     <Compile Include="Program.fs" />
     <PackageReference Include="MongoDB.Driver" Version="2.11.4" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.2" />
